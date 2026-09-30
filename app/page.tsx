@@ -19,7 +19,7 @@ export default async function Home() {
         </Link>
         <Link
           href={user ? "/dashboard" : "/login"}
-          className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
+          className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
         >
           {user ? "Dashboard" : "Log in"}
         </Link>

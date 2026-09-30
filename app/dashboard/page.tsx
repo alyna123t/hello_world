@@ -38,14 +38,14 @@ export default async function DashboardPage() {
         </Link>
         <Link
           href="/restaurants"
-          className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
+          className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
         >
           NYC Restaurants
         </Link>
         <form action="/auth/signout" method="post">
           <button
             type="submit"
-            className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
+            className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
           >
             Log out
           </button>
