@@ -74,7 +74,7 @@ export async function generateVibe(
     if (!res.ok) {
       const errText = await res.text();
       console.error("Groq API error:", errText);
-      return { error: "AI generation failed. Please try again." };
+      return { error: `AI generation failed (${res.status}): ${errText.slice(0, 200)}` };
     }
     const json = await res.json();
     content = json?.choices?.[0]?.message?.content?.trim() ?? "";
