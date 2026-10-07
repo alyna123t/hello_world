@@ -58,7 +58,7 @@ export async function generateVibe(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-20b",
+        model: "qwen/qwen3.8-27b",
         messages: [
           {
             role: "system",
@@ -67,7 +67,7 @@ export async function generateVibe(
           },
           { role: "user", content: prompt },
         ],
-        max_tokens: 150,
+        max_tokens: 200,
         temperature: 0.8,
       }),
     });
@@ -78,7 +78,7 @@ export async function generateVibe(
     }
     const json = await res.json();
     content = json?.choices?.[0]?.message?.content?.trim() ?? "";
-    if (!content) return { error: "AI returned an empty response. Try again." };
+    if (!content) return { error: `Empty response. Debug: ${JSON.stringify(json).slice(0, 400)}` };
   } catch (e) {
     console.error("Groq fetch error:", e);
     return { error: "Could not reach the AI service. Try again." };
