@@ -6,17 +6,39 @@ import type { VibeWithVotes } from "@/lib/supabase";
 import GenerateVibeForm from "./GenerateVibeForm";
 import VoteButtons from "./VoteButtons";
 
-// Direct Unsplash photo IDs — no redirect, no API key needed
-const CUISINE_PHOTO: Record<string, string> = {
-  Pizza:        "photo-1565299624946-b28f40a0ae38",
-  Deli:         "photo-1619740455993-9e612b1af08a",
-  Chinese:      "photo-1569050467447-ce54b3bbc37d",
-  Mexican:      "photo-1565299585323-38d6b0865b47",
-  Steakhouse:   "photo-1546964124-0cce460f38ef",
-  Italian:      "photo-1555396273-367ea4eb4db5",
-  "Korean BBQ": "photo-1604759835237-e3e1bd93e8a6",
-  Vegetarian:   "photo-1512621776951-a57141f2eefd",
+// Wikipedia article titles for restaurants that have pages
+const WIKI_TITLES: Record<number, string> = {
+  1: "Joe's Pizza",
+  2: "Katz's Delicatessen",
+  3: "Xi'an Famous Foods",
+  5: "Peter Luger Steak House",
+  8: "Superiority Burger",
 };
+
+// Fallback Unsplash photo IDs by cuisine (for restaurants without Wikipedia pages)
+const CUISINE_FALLBACK: Record<string, string> = {
+  Mexican:      "photo-1565958011703-44f9829ba187",
+  Italian:      "photo-1498579150354-977475b7ea0b",
+  "Korean BBQ": "photo-1529042410759-befb1204b468",
+};
+const DEFAULT_PHOTO = "photo-1414235077428-338989a2e8c0";
+
+async function fetchWikipediaImage(title: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+      { next: { revalidate: 86400 } },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const src: string | undefined = json?.thumbnail?.source;
+    if (!src) return null;
+    // Wikipedia returns small thumbnails; upscale to 800px wide
+    return src.replace(/\/\d+px-/, "/800px-");
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -49,6 +71,14 @@ export default async function RestaurantPage({
     .single();
 
   if (!restaurant) notFound();
+
+  // Try Wikipedia first, fall back to Unsplash
+  const wikiTitle = WIKI_TITLES[restaurantId];
+  const wikiImage = wikiTitle ? await fetchWikipediaImage(wikiTitle) : null;
+  const fallbackId = CUISINE_FALLBACK[restaurant.cuisine] ?? DEFAULT_PHOTO;
+  const heroUrl =
+    wikiImage ??
+    `https://images.unsplash.com/${fallbackId}?auto=format&fit=crop&w=1200&h=500`;
 
   const { data: vibesRaw } = await anonClient
     .from("vibes")
@@ -94,10 +124,6 @@ export default async function RestaurantPage({
     $$$$: "Splurge",
   };
 
-  const photoId =
-    CUISINE_PHOTO[restaurant.cuisine] ?? "photo-1414235077428-338989a2e8c0";
-  const heroUrl = `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=1200&h=500`;
-
   return (
     <main className="mx-auto w-full max-w-2xl p-8">
       <Link href="/restaurants" className="text-sm text-blue-600 hover:underline">
@@ -108,8 +134,8 @@ export default async function RestaurantPage({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={heroUrl}
-        alt={`${restaurant.cuisine} food`}
-        className="mt-4 h-52 w-full rounded-xl object-cover shadow"
+        alt={restaurant.name}
+        className="mt-4 h-56 w-full rounded-xl object-cover shadow"
       />
 
       {/* Restaurant header */}
@@ -132,8 +158,8 @@ export default async function RestaurantPage({
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Our AI writes a short, honest 2–3 sentence snapshot of what it&apos;s
           really like to eat here — the crowd, the energy, and what to order.
-          Add context below to personalize it (or leave it blank for a general
-          vibe). Then vote on the vibes others have generated.
+          Add context to personalize it, or leave it blank for a general vibe.
+          Then vote on vibes others have generated.
         </p>
       </div>
 
@@ -162,49 +188,42 @@ export default async function RestaurantPage({
         {vibes.length === 0 ? (
           <p className="mt-3 text-gray-500">
             No vibes yet —{" "}
-            {user ? "be the first to generate one!" : "log in to generate the first vibe!"}
+            {user
+              ? "be the first to generate one!"
+              : "log in to generate the first vibe!"}
           </p>
         ) : (
           <ul className="mt-4 flex flex-col gap-4">
             {vibes.map((vibe) => (
               <li
                 key={vibe.id}
-                className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
+                className="rounded-xl border border-gray-200 p-4 dark:border-gray-700"
               >
-                {/* Food photo thumbnail */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=800&h=200`}
-                  alt="food"
-                  className="h-32 w-full object-cover"
-                />
-                <div className="p-4">
-                  <p className="text-base leading-relaxed">{vibe.content}</p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-xs text-gray-400">
-                      by {vibe.author_name} &middot;{" "}
-                      {new Date(vibe.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                    {user ? (
-                      <VoteButtons
-                        vibeId={vibe.id}
-                        restaurantId={restaurantId}
-                        currentVote={vibe.userVote}
-                        score={vibe.score}
-                      />
-                    ) : (
-                      <Link
-                        href="/login"
-                        className="text-xs text-gray-400 hover:text-blue-600"
-                      >
-                        Log in to vote
-                      </Link>
-                    )}
-                  </div>
+                <p className="text-base leading-relaxed">{vibe.content}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-gray-400">
+                    by {vibe.author_name} &middot;{" "}
+                    {new Date(vibe.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                  {user ? (
+                    <VoteButtons
+                      vibeId={vibe.id}
+                      restaurantId={restaurantId}
+                      currentVote={vibe.userVote}
+                      score={vibe.score}
+                    />
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="text-xs text-gray-400 hover:text-blue-600"
+                    >
+                      Log in to vote
+                    </Link>
+                  )}
                 </div>
               </li>
             ))}
