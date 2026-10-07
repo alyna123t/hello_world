@@ -7,7 +7,6 @@ export const metadata = {
 };
 
 export default async function RestaurantsPage() {
-  // Fetch at request time so new rows in Supabase show up without a rebuild.
   await connection();
 
   const { data, error } = await supabase
@@ -17,15 +16,25 @@ export default async function RestaurantsPage() {
 
   const restaurants: Restaurant[] = data ?? [];
 
+  // Fetch vibe counts for each restaurant (anon-accessible)
+  const { data: vibeCounts } = await supabase
+    .from("vibes")
+    .select("restaurant_id");
+
+  const countByRestaurant: Record<number, number> = {};
+  for (const row of vibeCounts ?? []) {
+    countByRestaurant[row.restaurant_id] =
+      (countByRestaurant[row.restaurant_id] ?? 0) + 1;
+  }
+
   return (
     <main className="mx-auto w-full max-w-4xl p-8">
       <Link href="/" className="text-sm text-blue-600 hover:underline">
         &larr; Home
       </Link>
       <h1 className="mt-4 text-3xl font-bold">NYC Restaurants</h1>
-      <p className="mt-1 text-gray-600">
-        {restaurants.length} row{restaurants.length === 1 ? "" : "s"} loaded
-        from Supabase.
+      <p className="mt-1 text-gray-600 dark:text-gray-400">
+        Click a restaurant to read or generate AI vibe checks.
       </p>
 
       {error ? (
@@ -39,20 +48,40 @@ export default async function RestaurantsPage() {
       ) : (
         <table className="mt-6 w-full border-collapse text-left">
           <thead>
-            <tr className="border-b-2 border-gray-300">
+            <tr className="border-b-2 border-gray-300 dark:border-gray-700">
               <th className="py-2 pr-4">Name</th>
               <th className="py-2 pr-4">Neighbourhood</th>
               <th className="py-2 pr-4">Cuisine</th>
-              <th className="py-2">Price</th>
+              <th className="py-2 pr-4">Price</th>
+              <th className="py-2 text-right">Vibes</th>
             </tr>
           </thead>
           <tbody>
             {restaurants.map((r) => (
-              <tr key={r.id} className="border-b border-gray-200">
-                <td className="py-2 pr-4 font-medium">{r.name}</td>
+              <tr
+                key={r.id}
+                className="border-b border-gray-200 dark:border-gray-800"
+              >
+                <td className="py-2 pr-4 font-medium">
+                  <Link
+                    href={`/restaurants/${r.id}`}
+                    className="hover:underline text-blue-700 dark:text-blue-400"
+                  >
+                    {r.name}
+                  </Link>
+                </td>
                 <td className="py-2 pr-4">{r.neighbourhood}</td>
                 <td className="py-2 pr-4">{r.cuisine}</td>
-                <td className="py-2">{r.price_range}</td>
+                <td className="py-2 pr-4">{r.price_range}</td>
+                <td className="py-2 text-right">
+                  <Link
+                    href={`/restaurants/${r.id}`}
+                    className="text-sm text-gray-500 hover:text-blue-600"
+                  >
+                    {countByRestaurant[r.id] ?? 0} vibe
+                    {countByRestaurant[r.id] === 1 ? "" : "s"}
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>

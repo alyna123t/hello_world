@@ -7,7 +7,6 @@ export const metadata = {
   title: "Dashboard",
 };
 
-// Only visible to logged-in users (proxy.ts also guards this route).
 export default async function DashboardPage() {
   const { user, profile } = await getUserAndProfile();
   if (!user) redirect("/login");
@@ -22,25 +21,25 @@ export default async function DashboardPage() {
           size={64}
         />
         <div>
-          <h1 className="text-3xl font-bold">
-            Hi, {profile?.first_name}!
-          </h1>
-          <p className="text-gray-600">This page is only for logged-in users.</p>
+          <h1 className="text-3xl font-bold">Hi, {profile?.first_name}!</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Discover authentic NYC restaurant vibes from the community.
+          </p>
         </div>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
-          href="/profile"
-          className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
+          href="/restaurants"
+          className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
         >
-          Edit profile
+          Browse restaurants &amp; vibes
         </Link>
         <Link
-          href="/restaurants"
+          href="/profile"
           className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
         >
-          NYC Restaurants
+          Edit profile
         </Link>
         <form action="/auth/signout" method="post">
           <button

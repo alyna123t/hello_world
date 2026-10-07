@@ -19,3 +19,18 @@ export type Restaurant = {
   cuisine: string;
   price_range: string;
 };
+
+export type Vibe = {
+  id: number;
+  restaurant_id: number;
+  user_id: string;
+  author_name: string;
+  prompt: string;
+  content: string;
+  created_at: string;
+};
+
+export type VibeWithVotes = Vibe & {
+  score: number;
+  userVote: 1 | -1 | null;
+};
