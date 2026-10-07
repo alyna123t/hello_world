@@ -6,15 +6,16 @@ import type { VibeWithVotes } from "@/lib/supabase";
 import GenerateVibeForm from "./GenerateVibeForm";
 import VoteButtons from "./VoteButtons";
 
+// Direct Unsplash photo IDs — no redirect, no API key needed
 const CUISINE_PHOTO: Record<string, string> = {
-  Pizza: "pizza,new+york,slice",
-  Deli: "pastrami,deli,sandwich",
-  Chinese: "chinese+food,noodles,dumpling",
-  Mexican: "tacos,mexican+food,street+food",
-  Steakhouse: "steak,beef,grill",
-  Italian: "pasta,italian+food,trattoria",
-  "Korean BBQ": "korean+bbq,grill,meat",
-  Vegetarian: "veggie+burger,vegetables,plant+based",
+  Pizza:        "photo-1565299624946-b28f40a0ae38",
+  Deli:         "photo-1619740455993-9e612b1af08a",
+  Chinese:      "photo-1569050467447-ce54b3bbc37d",
+  Mexican:      "photo-1565299585323-38d6b0865b47",
+  Steakhouse:   "photo-1546964124-0cce460f38ef",
+  Italian:      "photo-1555396273-367ea4eb4db5",
+  "Korean BBQ": "photo-1604759835237-e3e1bd93e8a6",
+  Vegetarian:   "photo-1512621776951-a57141f2eefd",
 };
 
 export async function generateMetadata({
@@ -93,10 +94,9 @@ export default async function RestaurantPage({
     $$$$: "Splurge",
   };
 
-  const photoQuery =
-    CUISINE_PHOTO[restaurant.cuisine] ??
-    "new+york,food,restaurant";
-  const heroUrl = `https://source.unsplash.com/featured/1200x500/?${photoQuery}`;
+  const photoId =
+    CUISINE_PHOTO[restaurant.cuisine] ?? "photo-1414235077428-338989a2e8c0";
+  const heroUrl = `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=1200&h=500`;
 
   return (
     <main className="mx-auto w-full max-w-2xl p-8">
@@ -174,7 +174,7 @@ export default async function RestaurantPage({
                 {/* Food photo thumbnail */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`https://source.unsplash.com/featured/800x200/?${photoQuery}&sig=${vibe.id}`}
+                  src={`https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=800&h=200`}
                   alt="food"
                   className="h-32 w-full object-cover"
                 />
