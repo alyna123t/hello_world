@@ -3,7 +3,25 @@ import Link from "next/link";
 import { supabase, type Restaurant } from "@/lib/supabase";
 
 export const metadata = {
-  title: "NYC Restaurants",
+  title: "NYC Restaurants — NYC Vibes",
+};
+
+const CUISINE_PHOTO: Record<string, string> = {
+  Pizza: "photo-1565299624946-b28f40a0ae38",
+  Deli: "photo-1619740455993-9e612b1af08a",
+  Chinese: "photo-1569050467447-ce54b3bbc37d",
+  Mexican: "photo-1565299585323-38d6b0865b47",
+  Steakhouse: "photo-1546964124-0cce460f38ef",
+  Italian: "photo-1555396273-367ea4eb4db5",
+  "Korean BBQ": "photo-1604759835237-e3e1bd93e8a6",
+  Vegetarian: "photo-1512621776951-a57141f2eefd",
+};
+
+const PRICE_LABEL: Record<string, string> = {
+  $: "Budget",
+  $$: "Mid-range",
+  $$$: "Upscale",
+  $$$$: "Splurge",
 };
 
 export default async function RestaurantsPage() {
@@ -16,7 +34,6 @@ export default async function RestaurantsPage() {
 
   const restaurants: Restaurant[] = data ?? [];
 
-  // Fetch vibe counts for each restaurant (anon-accessible)
   const { data: vibeCounts } = await supabase
     .from("vibes")
     .select("restaurant_id");
@@ -28,64 +45,86 @@ export default async function RestaurantsPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl p-8">
-      <Link href="/" className="text-sm text-blue-600 hover:underline">
-        &larr; Home
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">NYC Restaurants</h1>
-      <p className="mt-1 text-gray-600 dark:text-gray-400">
-        Click a restaurant to read or generate AI vibe checks.
-      </p>
+    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">NYC Restaurants</h1>
+        <p className="mt-2 text-[var(--muted)]">
+          Explore AI vibe checks from the community.
+        </p>
+      </div>
 
       {error ? (
-        <p className="mt-6 rounded border border-red-300 bg-red-50 p-4 text-red-700">
+        <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400">
           Could not load restaurants: {error.message}
         </p>
       ) : restaurants.length === 0 ? (
-        <p className="mt-6 text-gray-600">
+        <p className="text-[var(--muted)]">
           No restaurants yet. Add some rows to the table in Supabase.
         </p>
       ) : (
-        <table className="mt-6 w-full border-collapse text-left">
-          <thead>
-            <tr className="border-b-2 border-gray-300 dark:border-gray-700">
-              <th className="py-2 pr-4">Name</th>
-              <th className="py-2 pr-4">Neighbourhood</th>
-              <th className="py-2 pr-4">Cuisine</th>
-              <th className="py-2 pr-4">Price</th>
-              <th className="py-2 text-right">Vibes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {restaurants.map((r) => (
-              <tr
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {restaurants.map((r) => {
+            const photoId =
+              CUISINE_PHOTO[r.cuisine] ?? "photo-1414235077428-338989a2e8c0";
+            const vibeCount = countByRestaurant[r.id] ?? 0;
+
+            return (
+              <Link
                 key={r.id}
-                className="border-b border-gray-200 dark:border-gray-800"
+                href={`/restaurants/${r.id}`}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
-                <td className="py-2 pr-4 font-medium">
-                  <Link
-                    href={`/restaurants/${r.id}`}
-                    className="hover:underline text-blue-700 dark:text-blue-400"
-                  >
-                    {r.name}
-                  </Link>
-                </td>
-                <td className="py-2 pr-4">{r.neighbourhood}</td>
-                <td className="py-2 pr-4">{r.cuisine}</td>
-                <td className="py-2 pr-4">{r.price_range}</td>
-                <td className="py-2 text-right">
-                  <Link
-                    href={`/restaurants/${r.id}`}
-                    className="text-sm text-gray-500 hover:text-blue-600"
-                  >
-                    {countByRestaurant[r.id] ?? 0} vibe
-                    {countByRestaurant[r.id] === 1 ? "" : "s"}
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {/* Food photo */}
+                <div className="relative h-44 w-full overflow-hidden bg-[var(--surface)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=600&h=350`}
+                    alt={`${r.cuisine} food`}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  {/* Cuisine pill floating over image */}
+                  <span className="absolute left-3 top-3 rounded-full bg-[var(--background)]/90 px-2.5 py-1 text-xs font-medium backdrop-blur-sm">
+                    {r.cuisine}
+                  </span>
+                </div>
+
+                {/* Card body */}
+                <div className="flex flex-1 flex-col gap-1 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="text-base font-semibold leading-snug">
+                      {r.name}
+                    </h2>
+                    <span
+                      className="shrink-0 rounded-md bg-[var(--surface)] px-2 py-0.5 text-xs font-medium text-[var(--muted)]"
+                      title={PRICE_LABEL[r.price_range]}
+                    >
+                      {r.price_range}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-[var(--muted)]">
+                    {r.neighbourhood}
+                  </p>
+
+                  <div className="mt-auto flex items-center justify-end pt-3">
+                    <span
+                      className={`text-xs font-medium ${
+                        vibeCount > 0
+                          ? "text-[var(--accent)]"
+                          : "text-[var(--muted)]"
+                      }`}
+                    >
+                      {vibeCount === 0
+                        ? "No vibes yet"
+                        : `${vibeCount} ${vibeCount === 1 ? "vibe" : "vibes"} →`}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       )}
     </main>
   );

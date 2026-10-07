@@ -12,24 +12,32 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
-      <h1 className="text-4xl font-bold">NYC Vibes</h1>
-      <p className="max-w-sm text-gray-600 dark:text-gray-400">
-        AI-generated vibe checks for NYC restaurants — written for people
-        exploring the city for the first time.
+    <main className="flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+      <span className="mb-4 inline-flex items-center rounded-full bg-[var(--accent-light)] px-3 py-1 text-xs font-medium text-[var(--accent)]">
+        AI-powered · Community-voted
+      </span>
+
+      <h1 className="max-w-lg text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
+        Find your vibe in New York City
+      </h1>
+
+      <p className="mt-4 max-w-sm text-base text-[var(--muted)]">
+        Real, honest restaurant snapshots — written by AI, shaped by your
+        situation, voted on by people who&apos;ve actually been there.
       </p>
-      <div className="mt-2 flex gap-3">
+
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link
           href="/restaurants"
-          className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+          className="rounded-xl bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--accent-dark)]"
         >
           Browse restaurants
         </Link>
         <Link
           href={user ? "/dashboard" : "/login"}
-          className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
+          className="rounded-xl border border-[var(--border)] px-6 py-3 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)]"
         >
-          {user ? "Dashboard" : "Log in to generate & vote"}
+          {user ? "Go to dashboard" : "Log in to generate & vote"}
         </Link>
       </div>
     </main>

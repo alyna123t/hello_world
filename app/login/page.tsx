@@ -19,13 +19,21 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 p-8">
-      <Link href="/" className="text-sm text-blue-600 hover:underline">
-        &larr; Home
+    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-10">
+      <Link
+        href="/"
+        className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+      >
+        ← Home
       </Link>
-      <h1 className="text-3xl font-bold">Log in</h1>
+      <div>
+        <h1 className="text-2xl font-bold">Welcome back</h1>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          Log in to generate vibe checks and vote.
+        </p>
+      </div>
       {error ? (
-        <p className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+        <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400">
           Login failed. Please try again.
         </p>
       ) : null}

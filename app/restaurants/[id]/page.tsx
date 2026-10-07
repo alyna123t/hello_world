@@ -125,9 +125,12 @@ export default async function RestaurantPage({
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl p-8">
-      <Link href="/restaurants" className="text-sm text-blue-600 hover:underline">
-        &larr; All restaurants
+    <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
+      <Link
+        href="/restaurants"
+        className="inline-flex items-center gap-1 text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+      >
+        ← All restaurants
       </Link>
 
       {/* Hero image */}
@@ -135,27 +138,29 @@ export default async function RestaurantPage({
       <img
         src={heroUrl}
         alt={restaurant.name}
-        className="mt-4 h-56 w-full rounded-xl object-cover shadow"
+        className="mt-4 h-56 w-full rounded-2xl object-cover"
       />
 
       {/* Restaurant header */}
       <div className="mt-5">
-        <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-        <p className="mt-1 text-gray-500 dark:text-gray-400">
-          {restaurant.neighbourhood} &middot; {restaurant.cuisine} &middot;{" "}
-          {restaurant.price_range}{" "}
-          <span className="text-gray-400">
-            ({priceLabel[restaurant.price_range] ?? restaurant.price_range})
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold leading-tight">{restaurant.name}</h1>
+          <span className="shrink-0 rounded-lg bg-[var(--surface)] px-2.5 py-1 text-sm font-medium text-[var(--muted)]">
+            {restaurant.price_range}
           </span>
+        </div>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          {restaurant.neighbourhood} &middot; {restaurant.cuisine} &middot;{" "}
+          {priceLabel[restaurant.price_range] ?? restaurant.price_range}
         </p>
       </div>
 
       {/* What is a Vibe Check */}
-      <div className="mt-6 rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
-        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="mt-6 rounded-2xl bg-[var(--accent-light)] p-4">
+        <p className="text-sm font-semibold text-[var(--accent)]">
           What&apos;s a Vibe Check?
         </p>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-[var(--muted)]">
           Our AI writes a short, honest 2–3 sentence snapshot of what it&apos;s
           really like to eat here — the crowd, the energy, and what to order.
           Add context to personalize it, or leave it blank for a general vibe.
@@ -169,8 +174,11 @@ export default async function RestaurantPage({
         {user ? (
           <GenerateVibeForm restaurantId={restaurant.id} />
         ) : (
-          <p className="mt-2 text-sm text-gray-500">
-            <Link href="/login" className="text-blue-600 hover:underline">
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            <Link
+              href="/login"
+              className="font-medium text-[var(--accent)] hover:underline"
+            >
               Log in
             </Link>{" "}
             to generate a vibe check and vote on others.
@@ -179,29 +187,30 @@ export default async function RestaurantPage({
       </section>
 
       {/* Vibes list */}
-      <section className="mt-8">
+      <section className="mt-10">
         <h2 className="text-lg font-semibold">
           Community Vibes{" "}
-          <span className="font-normal text-gray-400">({vibes.length})</span>
+          <span className="font-normal text-[var(--muted)]">({vibes.length})</span>
         </h2>
 
         {vibes.length === 0 ? (
-          <p className="mt-3 text-gray-500">
-            No vibes yet —{" "}
-            {user
-              ? "be the first to generate one!"
-              : "log in to generate the first vibe!"}
-          </p>
+          <div className="mt-4 rounded-2xl border border-dashed border-[var(--border)] p-8 text-center">
+            <p className="text-sm text-[var(--muted)]">
+              {user
+                ? "No vibes yet — be the first to generate one!"
+                : "No vibes yet. Log in to generate the first vibe!"}
+            </p>
+          </div>
         ) : (
-          <ul className="mt-4 flex flex-col gap-4">
+          <ul className="mt-4 flex flex-col gap-3">
             {vibes.map((vibe) => (
               <li
                 key={vibe.id}
-                className="rounded-xl border border-gray-200 p-4 dark:border-gray-700"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-sm"
               >
-                <p className="text-base leading-relaxed">{vibe.content}</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-gray-400">
+                <p className="text-sm leading-relaxed">{vibe.content}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-[var(--muted)]">
                     by {vibe.author_name} &middot;{" "}
                     {new Date(vibe.created_at).toLocaleDateString("en-US", {
                       month: "short",
@@ -219,7 +228,7 @@ export default async function RestaurantPage({
                   ) : (
                     <Link
                       href="/login"
-                      className="text-xs text-gray-400 hover:text-blue-600"
+                      className="text-xs text-[var(--muted)] hover:text-[var(--accent)]"
                     >
                       Log in to vote
                     </Link>

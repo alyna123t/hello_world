@@ -51,7 +51,7 @@ export default function GenerateVibeForm({
             key={s}
             type="button"
             onClick={() => applyStarter(s)}
-            className="rounded-full border border-gray-300 px-3 py-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+            className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)]"
           >
             {s}
           </button>
@@ -64,7 +64,7 @@ export default function GenerateVibeForm({
         name="note"
         maxLength={300}
         placeholder='e.g. "Going with friends on a Saturday night" or "I only eat halal"'
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:border-gray-600 dark:bg-gray-900"
+        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         rows={2}
       />
 
@@ -79,9 +79,9 @@ export default function GenerateVibeForm({
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-lg bg-black px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+        className="self-start rounded-xl bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-dark)] disabled:opacity-60"
       >
-        {pending ? "Generating…" : "✦ Generate vibe check"}
+        {pending ? "Generating…" : "Generate vibe check"}
       </button>
     </form>
   );

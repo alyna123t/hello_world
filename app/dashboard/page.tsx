@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   if (needsName(profile)) redirect("/welcome");
 
   return (
-    <main className="mx-auto w-full max-w-2xl p-8">
+    <main className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
       <div className="flex items-center gap-4">
         <Avatar
           url={profile?.avatar_url ?? null}
@@ -21,8 +21,8 @@ export default async function DashboardPage() {
           size={64}
         />
         <div>
-          <h1 className="text-3xl font-bold">Hi, {profile?.first_name}!</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-2xl font-bold">Hi, {profile?.first_name}!</h1>
+          <p className="text-sm text-[var(--muted)]">
             Discover authentic NYC restaurant vibes from the community.
           </p>
         </div>
@@ -31,20 +31,20 @@ export default async function DashboardPage() {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href="/restaurants"
-          className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+          className="rounded-xl bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-dark)]"
         >
-          Browse restaurants &amp; vibes
+          Browse restaurants
         </Link>
         <Link
           href="/profile"
-          className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
+          className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)]"
         >
           Edit profile
         </Link>
         <form action="/auth/signout" method="post">
           <button
             type="submit"
-            className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-500/10"
+            className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)]"
           >
             Log out
           </button>
