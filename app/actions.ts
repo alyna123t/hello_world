@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { supabase as anonClient } from "@/lib/supabase";
 
 // ---- Vibe generation ----
 
@@ -30,7 +31,7 @@ export async function generateVibe(
     .maybeSingle();
   const authorName = profile?.first_name?.trim() || "Anonymous";
 
-  const { data: restaurant } = await supabase
+  const { data: restaurant } = await anonClient
     .from("restaurants")
     .select("name, neighbourhood, cuisine, price_range")
     .eq("id", restaurantId)
