@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient, getUserAndProfile } from "@/lib/supabase/server";
+import { getUserAndProfile } from "@/lib/supabase/server";
+import { supabase as anonClient } from "@/lib/supabase";
 import type { VibeWithVotes } from "@/lib/supabase";
 import GenerateVibeForm from "./GenerateVibeForm";
 import VoteButtons from "./VoteButtons";
@@ -11,8 +12,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await anonClient
     .from("restaurants")
     .select("name")
     .eq("id", Number(id))
@@ -28,9 +28,12 @@ export default async function RestaurantPage({
   const { id } = await params;
   const restaurantId = Number(id);
 
+  // Use anon client for public tables (restaurants, vibes) — their RLS policies
+  // allow anon reads. The authenticated SSR client is used only for vibe_votes,
+  // which requires a logged-in session.
   const { supabase, user } = await getUserAndProfile();
 
-  const { data: restaurant } = await supabase
+  const { data: restaurant } = await anonClient
     .from("restaurants")
     .select("id, name, neighbourhood, cuisine, price_range")
     .eq("id", restaurantId)
@@ -38,8 +41,7 @@ export default async function RestaurantPage({
 
   if (!restaurant) notFound();
 
-  // Fetch vibes — readable by everyone (anon RLS policy allows this)
-  const { data: vibesRaw } = await supabase
+  const { data: vibesRaw } = await anonClient
     .from("vibes")
     .select("id, content, author_name, created_at")
     .eq("restaurant_id", restaurantId)
