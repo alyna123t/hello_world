@@ -6,6 +6,17 @@ import type { VibeWithVotes } from "@/lib/supabase";
 import GenerateVibeForm from "./GenerateVibeForm";
 import VoteButtons from "./VoteButtons";
 
+const CUISINE_PHOTO: Record<string, string> = {
+  Pizza: "pizza,new+york,slice",
+  Deli: "pastrami,deli,sandwich",
+  Chinese: "chinese+food,noodles,dumpling",
+  Mexican: "tacos,mexican+food,street+food",
+  Steakhouse: "steak,beef,grill",
+  Italian: "pasta,italian+food,trattoria",
+  "Korean BBQ": "korean+bbq,grill,meat",
+  Vegetarian: "veggie+burger,vegetables,plant+based",
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -17,7 +28,7 @@ export async function generateMetadata({
     .select("name")
     .eq("id", Number(id))
     .single();
-  return { title: data?.name ? `${data.name} Vibes` : "Restaurant Vibes" };
+  return { title: data?.name ? `${data.name} — NYC Vibes` : "NYC Vibes" };
 }
 
 export default async function RestaurantPage({
@@ -28,9 +39,6 @@ export default async function RestaurantPage({
   const { id } = await params;
   const restaurantId = Number(id);
 
-  // Use anon client for public tables (restaurants, vibes) — their RLS policies
-  // allow anon reads. The authenticated SSR client is used only for vibe_votes,
-  // which requires a logged-in session.
   const { supabase, user } = await getUserAndProfile();
 
   const { data: restaurant } = await anonClient
@@ -47,7 +55,6 @@ export default async function RestaurantPage({
     .eq("restaurant_id", restaurantId)
     .order("created_at", { ascending: false });
 
-  // Fetch votes only for authenticated users (RLS restricts anon reads)
   let vibes: VibeWithVotes[] = [];
   if (user && vibesRaw && vibesRaw.length > 0) {
     const vibeIds = vibesRaw.map((v) => v.id);
@@ -65,14 +72,7 @@ export default async function RestaurantPage({
       const userVote =
         (vibeVotes.find((vote: { user_id: string }) => vote.user_id === user.id)
           ?.vote as 1 | -1 | undefined) ?? null;
-      return {
-        ...v,
-        restaurant_id: restaurantId,
-        user_id: "",
-        prompt: "",
-        score,
-        userVote,
-      };
+      return { ...v, restaurant_id: restaurantId, user_id: "", prompt: "", score, userVote };
     });
     vibes.sort((a, b) => b.score - a.score || b.created_at.localeCompare(a.created_at));
   } else {
@@ -93,18 +93,29 @@ export default async function RestaurantPage({
     $$$$: "Splurge",
   };
 
+  const photoQuery =
+    CUISINE_PHOTO[restaurant.cuisine] ??
+    "new+york,food,restaurant";
+  const heroUrl = `https://source.unsplash.com/featured/1200x500/?${photoQuery}`;
+
   return (
     <main className="mx-auto w-full max-w-2xl p-8">
-      <Link
-        href="/restaurants"
-        className="text-sm text-blue-600 hover:underline"
-      >
+      <Link href="/restaurants" className="text-sm text-blue-600 hover:underline">
         &larr; All restaurants
       </Link>
 
-      <div className="mt-4">
+      {/* Hero image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={heroUrl}
+        alt={`${restaurant.cuisine} food`}
+        className="mt-4 h-52 w-full rounded-xl object-cover shadow"
+      />
+
+      {/* Restaurant header */}
+      <div className="mt-5">
         <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-        <p className="mt-1 text-gray-500">
+        <p className="mt-1 text-gray-500 dark:text-gray-400">
           {restaurant.neighbourhood} &middot; {restaurant.cuisine} &middot;{" "}
           {restaurant.price_range}{" "}
           <span className="text-gray-400">
@@ -113,9 +124,22 @@ export default async function RestaurantPage({
         </p>
       </div>
 
+      {/* What is a Vibe Check */}
+      <div className="mt-6 rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          What&apos;s a Vibe Check?
+        </p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Our AI writes a short, honest 2–3 sentence snapshot of what it&apos;s
+          really like to eat here — the crowd, the energy, and what to order.
+          Add context below to personalize it (or leave it blank for a general
+          vibe). Then vote on the vibes others have generated.
+        </p>
+      </div>
+
       {/* Generate section */}
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Generate a vibe check</h2>
+      <section className="mt-6">
+        <h2 className="text-lg font-semibold">Generate a Vibe Check</h2>
         {user ? (
           <GenerateVibeForm restaurantId={restaurant.id} />
         ) : (
@@ -123,7 +147,7 @@ export default async function RestaurantPage({
             <Link href="/login" className="text-blue-600 hover:underline">
               Log in
             </Link>{" "}
-            to generate AI-powered vibe checks for this restaurant.
+            to generate a vibe check and vote on others.
           </p>
         )}
       </section>
@@ -131,49 +155,56 @@ export default async function RestaurantPage({
       {/* Vibes list */}
       <section className="mt-8">
         <h2 className="text-lg font-semibold">
-          Community vibes{" "}
-          <span className="text-gray-400 font-normal">({vibes.length})</span>
+          Community Vibes{" "}
+          <span className="font-normal text-gray-400">({vibes.length})</span>
         </h2>
 
         {vibes.length === 0 ? (
           <p className="mt-3 text-gray-500">
-            No vibes yet.{" "}
-            {user
-              ? "Be the first to generate one above!"
-              : "Log in to generate the first vibe!"}
+            No vibes yet —{" "}
+            {user ? "be the first to generate one!" : "log in to generate the first vibe!"}
           </p>
         ) : (
           <ul className="mt-4 flex flex-col gap-4">
             {vibes.map((vibe) => (
               <li
                 key={vibe.id}
-                className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
               >
-                <p className="text-base leading-relaxed">{vibe.content}</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-gray-400">
-                    by {vibe.author_name} &middot;{" "}
-                    {new Date(vibe.created_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                  {user ? (
-                    <VoteButtons
-                      vibeId={vibe.id}
-                      restaurantId={restaurantId}
-                      currentVote={vibe.userVote}
-                      score={vibe.score}
-                    />
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="text-xs text-gray-400 hover:text-blue-600"
-                    >
-                      Log in to vote
-                    </Link>
-                  )}
+                {/* Food photo thumbnail */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`https://source.unsplash.com/featured/800x200/?${photoQuery}&sig=${vibe.id}`}
+                  alt="food"
+                  className="h-32 w-full object-cover"
+                />
+                <div className="p-4">
+                  <p className="text-base leading-relaxed">{vibe.content}</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-xs text-gray-400">
+                      by {vibe.author_name} &middot;{" "}
+                      {new Date(vibe.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    {user ? (
+                      <VoteButtons
+                        vibeId={vibe.id}
+                        restaurantId={restaurantId}
+                        currentVote={vibe.userVote}
+                        score={vibe.score}
+                      />
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="text-xs text-gray-400 hover:text-blue-600"
+                      >
+                        Log in to vote
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </li>
             ))}

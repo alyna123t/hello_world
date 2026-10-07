@@ -1,7 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { generateVibe, type VibeFormState } from "@/app/actions";
+
+const STARTERS = [
+  "Going on a first date",
+  "Solo lunch on a budget",
+  "Bringing my parents",
+  "Late night after a show",
+  "I'm vegetarian",
+];
 
 export default function GenerateVibeForm({
   restaurantId,
@@ -12,28 +20,68 @@ export default function GenerateVibeForm({
     generateVibe,
     {},
   );
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function applyStarter(text: string) {
+    if (textareaRef.current) {
+      textareaRef.current.value = text;
+      textareaRef.current.focus();
+    }
+  }
 
   return (
     <form action={formAction} className="mt-3 flex flex-col gap-3">
       <input type="hidden" name="restaurant_id" value={restaurantId} />
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="vibe-note" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Your situation{" "}
+          <span className="font-normal text-gray-400">(optional)</span>
+        </label>
+        <p className="text-xs text-gray-400">
+          Tell the AI your context so it writes a vibe check tailored to you.
+          Or leave it blank for a general vibe.
+        </p>
+      </div>
+
+      {/* Quick-fill starters */}
+      <div className="flex flex-wrap gap-2">
+        {STARTERS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => applyStarter(s)}
+            className="rounded-full border border-gray-300 px-3 py-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
       <textarea
+        ref={textareaRef}
+        id="vibe-note"
         name="note"
         maxLength={300}
-        placeholder="Optional: add context for the AI — e.g. 'I'm vegetarian' or 'went on a Friday night'"
-        className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:border-gray-600 dark:bg-gray-900"
+        placeholder='e.g. "Going with friends on a Saturday night" or "I only eat halal"'
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:border-gray-600 dark:bg-gray-900"
         rows={2}
       />
+
       {state.error ? (
         <p className="text-sm text-red-600">{state.error}</p>
       ) : state.success ? (
-        <p className="text-sm text-green-600">Vibe generated! Scroll down to see it.</p>
+        <p className="text-sm text-green-600">
+          Vibe generated! Scroll down to see it.
+        </p>
       ) : null}
+
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded bg-black px-4 py-2 text-sm text-white hover:bg-gray-800 disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+        className="self-start rounded-lg bg-black px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-gray-200"
       >
-        {pending ? "Generating…" : "Generate vibe check"}
+        {pending ? "Generating…" : "✦ Generate vibe check"}
       </button>
     </form>
   );
