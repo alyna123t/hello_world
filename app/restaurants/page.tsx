@@ -6,6 +6,16 @@ export const metadata = {
   title: "NYC Restaurants — NYC Vibes",
 };
 
+// Restaurants with Wikipedia articles — used for real restaurant photos
+const WIKI_TITLES: Record<number, string> = {
+  1: "Joe's Pizza",
+  2: "Katz's Delicatessen",
+  3: "Xi'an Famous Foods",
+  5: "Peter Luger Steak House",
+  8: "Superiority Burger",
+};
+
+// Cuisine fallbacks for restaurants without Wikipedia pages
 const CUISINE_PHOTO: Record<string, string> = {
   Pizza: "photo-1565299624946-b28f40a0ae38",
   Deli: "photo-1619740455993-9e612b1af08a",
@@ -16,6 +26,23 @@ const CUISINE_PHOTO: Record<string, string> = {
   "Korean BBQ": "photo-1604759835237-e3e1bd93e8a6",
   Vegetarian: "photo-1512621776951-a57141f2eefd",
 };
+const DEFAULT_PHOTO = "photo-1414235077428-338989a2e8c0";
+
+async function fetchWikipediaImage(title: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+      { next: { revalidate: 86400 } },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const src: string | undefined = json?.thumbnail?.source;
+    if (!src) return null;
+    return src.replace(/\/\d+px-/, "/600px-");
+  } catch {
+    return null;
+  }
+}
 
 const PRICE_LABEL: Record<string, string> = {
   $: "Budget",
@@ -44,6 +71,17 @@ export default async function RestaurantsPage() {
       (countByRestaurant[row.restaurant_id] ?? 0) + 1;
   }
 
+  // Fetch Wikipedia images in parallel for restaurants that have articles
+  const wikiPhotoMap: Record<number, string> = {};
+  await Promise.all(
+    restaurants
+      .filter((r) => WIKI_TITLES[r.id])
+      .map(async (r) => {
+        const img = await fetchWikipediaImage(WIKI_TITLES[r.id]);
+        if (img) wikiPhotoMap[r.id] = img;
+      }),
+  );
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
       <div className="mb-8">
@@ -64,8 +102,10 @@ export default async function RestaurantsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {restaurants.map((r) => {
-            const photoId =
-              CUISINE_PHOTO[r.cuisine] ?? "photo-1414235077428-338989a2e8c0";
+            const fallbackId = CUISINE_PHOTO[r.cuisine] ?? DEFAULT_PHOTO;
+            const photoUrl =
+              wikiPhotoMap[r.id] ??
+              `https://images.unsplash.com/${fallbackId}?auto=format&fit=crop&w=600&h=350`;
             const vibeCount = countByRestaurant[r.id] ?? 0;
 
             return (
@@ -78,8 +118,8 @@ export default async function RestaurantsPage() {
                 <div className="relative h-44 w-full overflow-hidden bg-[var(--surface)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=600&h=350`}
-                    alt={`${r.cuisine} food`}
+                    src={photoUrl}
+                    alt={r.name}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
