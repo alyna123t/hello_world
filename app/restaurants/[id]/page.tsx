@@ -19,7 +19,7 @@ const WIKI_TITLES: Record<number, string> = {
 const CUISINE_FALLBACK: Record<string, string> = {
   Mexican:      "photo-1565958011703-44f9829ba187",
   Italian:      "photo-1498579150354-977475b7ea0b",
-  "Korean BBQ": "photo-1604759835237-e3e1bd93e8a6",
+  "Korean BBQ": "photo-1414235077428-338989a2e8c0",
 };
 const DEFAULT_PHOTO = "photo-1414235077428-338989a2e8c0";
 
