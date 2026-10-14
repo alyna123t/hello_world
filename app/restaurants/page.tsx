@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import Link from "next/link";
 import { supabase, type Restaurant } from "@/lib/supabase";
+import RestaurantCardImage from "@/app/RestaurantCardImage";
 
 export const metadata = {
   title: "NYC Restaurants — NYC Vibes",
@@ -47,10 +48,13 @@ export default async function RestaurantsPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">NYC Restaurants</h1>
+      <div className="mb-10">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--accent)]">
+          New York City
+        </p>
+        <h1 className="text-3xl font-bold tracking-tight">Restaurants</h1>
         <p className="mt-2 text-[var(--muted)]">
-          Explore AI vibe checks from the community.
+          AI vibe checks, voted on by the community.
         </p>
       </div>
 
@@ -73,17 +77,11 @@ export default async function RestaurantsPage() {
               <Link
                 key={r.id}
                 href={`/restaurants/${r.id}`}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                className="group flex flex-col overflow-hidden rounded-2xl bg-[var(--background)] shadow-[0_1px_4px_rgba(0,0,0,0.07)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
               >
                 {/* Food photo */}
                 <div className="relative h-44 w-full overflow-hidden bg-[var(--surface)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photoUrl}
-                    alt={r.name}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
+                  <RestaurantCardImage src={photoUrl} alt={r.name} cuisine={r.cuisine} />
                   {/* Cuisine pill floating over image */}
                   <span className="absolute left-3 top-3 rounded-full bg-[var(--background)]/90 px-2.5 py-1 text-xs font-medium backdrop-blur-sm">
                     {r.cuisine}

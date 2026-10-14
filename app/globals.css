@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --surface: #f7f7f7;
-  --surface-2: #efefef;
-  --border: #e8e8e8;
-  --muted: #737373;
-  --accent: #f97316;
-  --accent-dark: #ea6c0a;
-  --accent-light: #fff7ed;
-  --positive: #16a34a;
-  --negative: #dc2626;
+  --background: #faf8f5;
+  --foreground: #1c1814;
+  --surface: #f1ebe0;
+  --surface-2: #e7dfd2;
+  --border: #ddd5c5;
+  --muted: #9a8c7c;
+  --accent: #c94f0c;
+  --accent-dark: #a83d09;
+  --accent-light: #fdf0e6;
+  --positive: #2d7a4f;
+  --negative: #c73030;
 }
 
 @theme inline {
@@ -24,36 +24,35 @@
   --color-accent: var(--accent);
   --color-accent-dark: var(--accent-dark);
   --color-accent-light: var(--accent-light);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-dm-sans);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background: #0f0f0f;
-    --foreground: #fafafa;
-    --surface: #1a1a1a;
-    --surface-2: #252525;
-    --border: #2e2e2e;
-    --muted: #a3a3a3;
-    --accent: #f97316;
-    --accent-dark: #fb923c;
-    --accent-light: #1c1207;
+    --background: #141210;
+    --foreground: #f5f0e8;
+    --surface: #1e1a16;
+    --surface-2: #26201a;
+    --border: #342c24;
+    --muted: #9a8c7c;
+    --accent: #e8622a;
+    --accent-dark: #f07040;
+    --accent-light: #1f1108;
     --positive: #4ade80;
     --negative: #f87171;
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #0f0f0f;
-  --foreground: #fafafa;
-  --surface: #1a1a1a;
-  --surface-2: #252525;
-  --border: #2e2e2e;
-  --muted: #a3a3a3;
-  --accent: #f97316;
-  --accent-dark: #fb923c;
-  --accent-light: #1c1207;
+  --background: #141210;
+  --foreground: #f5f0e8;
+  --surface: #1e1a16;
+  --surface-2: #26201a;
+  --border: #342c24;
+  --muted: #9a8c7c;
+  --accent: #e8622a;
+  --accent-dark: #f07040;
+  --accent-light: #1f1108;
   --positive: #4ade80;
   --negative: #f87171;
 }
@@ -61,5 +60,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans, -apple-system, sans-serif);
+  font-family: var(--font-sans, system-ui, sans-serif);
 }
