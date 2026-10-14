@@ -1,5 +1,5 @@
 const inputClass =
-  "mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900";
+  "mt-1.5 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20";
 
 export default function NameFields({
   firstName,

@@ -59,31 +59,42 @@ export default function ProfileForm({
   const [state, formAction, pending] = useActionState(submit, {});
 
   return (
-    <form action={formAction} className="mt-6 flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-5">
+      {/* Avatar + photo upload */}
       <div className="flex items-center gap-4">
-        <Avatar url={preview} name={firstName} size={80} />
-        <label className="text-sm font-medium">
-          Photo
-          <input
-            type="file"
-            name="photo"
-            accept="image/*"
-            className="mt-1 block text-sm"
-          />
-        </label>
+        <Avatar url={preview} name={firstName} size={64} />
+        <div>
+          <p className="text-xs font-medium text-[var(--muted)]">Profile photo</p>
+          <label className="mt-1.5 inline-flex cursor-pointer items-center rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)]">
+            Change photo
+            <input
+              type="file"
+              name="photo"
+              accept="image/*"
+              className="sr-only"
+            />
+          </label>
+        </div>
       </div>
+
       <NameFields firstName={firstName} lastName={lastName} />
+
       {state.error ? (
-        <p className="text-sm text-red-700">{state.error}</p>
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-400">
+          {state.error}
+        </p>
       ) : state.saved ? (
-        <p className="text-sm text-green-700">Saved!</p>
+        <p className="rounded-lg bg-[var(--accent-light)] px-3 py-2 text-sm font-medium text-[var(--accent)]">
+          Saved!
+        </p>
       ) : null}
+
       <button
         type="submit"
         disabled={pending}
-        className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800 disabled:opacity-60"
+        className="w-full rounded-xl bg-[var(--accent)] py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-dark)] disabled:opacity-60"
       >
-        {pending ? "Saving…" : "Save"}
+        {pending ? "Saving…" : "Save changes"}
       </button>
     </form>
   );
