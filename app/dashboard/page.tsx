@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     content: string;
     created_at: string;
     restaurant_id: number;
-    restaurants: { id: number; name: string; neighbourhood: string } | null;
+    restaurants: { id: number; name: string; neighbourhood: string }[] | null;
   }>;
 
   return (
@@ -97,23 +97,22 @@ export default async function DashboardPage() {
                 <li key={vibe.id} className="px-6 py-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      {vibe.restaurants ? (
-                        <Link
-                          href={`/restaurants/${vibe.restaurants.id}`}
-                          className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-                        >
-                          {vibe.restaurants.name}
-                        </Link>
-                      ) : (
-                        <span className="text-sm font-semibold text-[var(--muted)]">
-                          Unknown restaurant
-                        </span>
-                      )}
-                      {vibe.restaurants && (
-                        <p className="text-xs text-[var(--muted)]">
-                          {vibe.restaurants.neighbourhood}
-                        </p>
-                      )}
+                      {(() => {
+                        const r = Array.isArray(vibe.restaurants) ? vibe.restaurants[0] : vibe.restaurants;
+                        return r ? (
+                          <>
+                            <Link
+                              href={`/restaurants/${r.id}`}
+                              className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                            >
+                              {r.name}
+                            </Link>
+                            <p className="text-xs text-[var(--muted)]">{r.neighbourhood}</p>
+                          </>
+                        ) : (
+                          <span className="text-sm font-semibold text-[var(--muted)]">Unknown restaurant</span>
+                        );
+                      })()}
                       <p className="mt-1.5 text-sm leading-relaxed text-[var(--foreground)]/80">
                         {vibe.content}
                       </p>
