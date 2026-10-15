@@ -62,3 +62,12 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans, system-ui, sans-serif);
 }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee {
+  animation: marquee 32s linear infinite;
+}
